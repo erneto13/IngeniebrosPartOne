@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.pascal.game.Screens.Game.Extras.MainExtrasScreen;
 import com.pascal.game.Screens.Game.IO.Inputs;
@@ -30,6 +31,7 @@ public class PlayScreen implements Screen {
     public double victorTimely = 0;
 
     private Texture backgroundTexture;
+    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
     private TextUtils version;
 
@@ -44,31 +46,35 @@ public class PlayScreen implements Screen {
         Gdx.input.setInputProcessor(inputs);
         version = new TextUtils(PathsUtils.THIRD_FONT, 22, Color.WHITE);
 
-        // Generar los TextUtils para cada opción del menú
-        for (int i = 0; i < optionsMenu.length; i++) {
-            if (optionsMenu[i].equalsIgnoreCase("Opciones")) {
-                textOptions[i] = new TextUtils(PathsUtils.THIRD_FONT, 48, Color.LIGHT_GRAY);
-            } else if (optionsMenu[i].equalsIgnoreCase("Salir")) {
-                textOptions[i] = new TextUtils(PathsUtils.THIRD_FONT, 48, Color.LIGHT_GRAY);
-            } else {
-                textOptions[i] = new TextUtils(PathsUtils.THIRD_FONT, 48, Color.WHITE);
-            }
-
-            // Configurar posición para todas las opciones
-            float initialPositionX = ((float) Gdx.app.getGraphics().getWidth() / 2.5f - (textOptions[i].getWidth()));
-            float initialPositionY = ((float) Gdx.app.getGraphics().getHeight() / 2 + textOptions[i].getHeight() / 2);
-            float betweenSpace = textOptions[i].getHeight() + 30;
-
-            textOptions[i].setText(optionsMenu[i]);
-            if (textOptions[i] == textOptions[3]) {
-                textOptions[i].setPosition(initialPositionX, initialPositionY - (betweenSpace * i + 25));
-            } else if (textOptions[i] == textOptions[2]) {
-                textOptions[i].setPosition(initialPositionX, initialPositionY - (betweenSpace * i + 25));
-            } else {
-                textOptions[i].setPosition(initialPositionX, initialPositionY - (betweenSpace * i));
+        // Configurar posición inicial para todas las opciones
+        float totalWidth = 0;
+        float maxHeight = 0;
+        for (String option : optionsMenu) {
+            TextUtils tempText = new TextUtils(PathsUtils.THIRD_FONT, 48, Color.WHITE);
+            tempText.setText(option);
+            totalWidth += tempText.getWidth() + 30;
+            if (tempText.getHeight() > maxHeight) {
+                maxHeight = tempText.getHeight();
             }
         }
+
+        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2; // Centra horizontalmente
+        float startY = (Gdx.graphics.getHeight() - maxHeight) / 2; // Centra verticalmente
+
+        // Generar los TextUtils para cada opción del menú
+        float currentX = startX;
+        float currentY = startY;
+        for (int i = 0; i < optionsMenu.length; i++) {
+            TextUtils text = new TextUtils(PathsUtils.THIRD_FONT, 48, Color.WHITE);
+            text.setText(optionsMenu[i]);
+            text.setPosition(currentX, currentY);
+            textOptions[i] = text;
+
+            // Actualizar la posición Y para la siguiente opción
+            currentY -= text.getHeight() + 30; // Espacio entre cada opción
+        }
     }
+
 
     @Override
     public void render(float delta) {
@@ -86,6 +92,19 @@ public class PlayScreen implements Screen {
             text.draw();
         }
         batch.end();
+
+        // Dibujar rectángulos alrededor de las opciones
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.WHITE);
+        for (TextUtils text : textOptions) {
+            shapeRenderer.rect(
+                    text.getX(),                           // X posición del rectángulo
+                    text.getY() - text.getHeight(),        // Y posición del rectángulo
+                    text.getWidth(),                       // Ancho del rectángulo
+                    text.getHeight()                       // Alto del rectángulo
+            );
+        }
+        shapeRenderer.end();
 
         // tiempo
         victorTimely += delta;
@@ -211,5 +230,7 @@ public class PlayScreen implements Screen {
     public void dispose() {
         batch.dispose();
         backgroundTexture.dispose();
+        shapeRenderer.dispose();
+
     }
 }

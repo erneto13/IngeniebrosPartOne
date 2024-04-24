@@ -10,7 +10,7 @@ public class DesktopLauncher {
 		config.setTitle("Ingeniebros I: La amenaza de las 8 cintas");
 		config.setWindowIcon("15.png");
 		config.setMaximized(true);
-		//config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
+		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 		new Lwjgl3Application(new IngeniebrosGame(), config);
 	}
 }

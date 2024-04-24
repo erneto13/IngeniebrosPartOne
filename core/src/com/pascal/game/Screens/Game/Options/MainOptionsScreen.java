@@ -2,46 +2,118 @@ package com.pascal.game.Screens.Game.Options;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.pascal.game.Screens.Game.IO.InputsScreen;
 import com.pascal.game.Screens.Game.Play.MainPlayScreen;
 import com.pascal.game.Screens.Game.PlayScreen;
 import com.pascal.game.Utils.PathsUtils;
 import com.pascal.game.Utils.TextUtils;
 
+import javax.swing.event.ChangeEvent;
+
 import static com.pascal.game.Utils.RenderUtils.batch;
 
 public class MainOptionsScreen implements Screen {
 
     public static Game game;
+    private Stage stage;
+    private Skin skin;
 
+    // Elements
+    private Label volumeMusicLabel;
+    private Label musicOnOffLabel;
+    private Slider volumeMusicSlider;
+    private CheckBox musicCheckbox;
+
+    // AppPreferences
+    private AppPreferences appPreferences;
+    private InputMultiplexer inputMultiplexer;
+
+
+    // Texto y fondo de la pantalla
     private TextUtils BACK_MENU;
+    private Texture background;
 
-    // para usar el mouse
+    // Para el uso del mouse
     private final InputsScreen inputsOptions = new InputsScreen(this);
     public double victorTimely = 0;
     private int option = 1;
 
-    // constructor de la clase
+    // Constructor de la clase
     public MainOptionsScreen(Game game) {
         this.game = game;
+        this.stage = new Stage();
+        this.skin = new Skin(Gdx.files.internal("uiskin.json"));
+        this.appPreferences = new AppPreferences();
+        this.inputMultiplexer = new InputMultiplexer(); // Aquí se inicializa inputMultiplexer
+        inputMultiplexer.addProcessor(inputsOptions);
+        inputMultiplexer.addProcessor(stage);
     }
 
     @Override
     public void show() {
         // inicialización del render
         batch = new SpriteBatch();
+        background = new Texture(Gdx.files.internal("backgrounds/clouds_background.png"));
 
         // indica a la clase quien se va a encargar de procesar las entradas
-        Gdx.input.setInputProcessor(inputsOptions);
+        Gdx.input.setInputProcessor(inputMultiplexer);
 
         // inicialización del texto "BACK"
         BACK_MENU = new TextUtils(PathsUtils.THIRD_FONT, 35, Color.WHITE);
         BACK_MENU.setText("REGRESAR");
         BACK_MENU.setPosition(40, 80);
+
+        // Create elements
+        volumeMusicLabel = new Label("Music Volume", skin);
+        musicOnOffLabel = new Label("Music On/Off", skin);
+        volumeMusicSlider = new Slider(0f, 1f, 0.1f, false, skin);
+        musicCheckbox = new CheckBox(null, skin);
+
+        // Set initial values from preferences
+        volumeMusicSlider.setValue(appPreferences.getMusicVolume());
+        musicCheckbox.setChecked(appPreferences.isMusicEnabled());
+
+        // Add listeners
+        volumeMusicSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                appPreferences.setMusicVolume(volumeMusicSlider.getValue());
+            }
+        });
+
+        musicCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                boolean enabled = musicCheckbox.isChecked();
+                appPreferences.setMusicEnabled(enabled);
+            }
+        });
+
+        // Create layout
+        Table table = new Table();
+        table.setFillParent(true);
+        table.defaults().pad(10);
+
+        // Add elements to table
+        table.row();
+        table.add(volumeMusicLabel).left();
+        table.add(volumeMusicSlider).fillX().expandX();
+        table.row();
+        table.add(musicOnOffLabel).left();
+        table.add(musicCheckbox).left();
+        table.row();
+
+        stage.addActor(table);
     }
 
     @Override
@@ -50,8 +122,10 @@ public class MainOptionsScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
+        batch.draw(background, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         BACK_MENU.draw(); // dibujar la opcion de regresar
-
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
         batch.end();
         handleBackOption();
 
@@ -59,7 +133,9 @@ public class MainOptionsScreen implements Screen {
     }
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
 
     @Override
     public void pause() {}
@@ -73,6 +149,8 @@ public class MainOptionsScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
+        stage.dispose();
+        skin.dispose();
     }
 
     // función para el botón de regresar
