@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.pascal.game.Screens.Game.Extras.MainExtrasScreen;
 import com.pascal.game.Screens.Game.IO.Inputs;
+import com.pascal.game.Managers.PreferencesManager;
 import com.pascal.game.Screens.Game.Options.MainOptionsScreen;
 import com.pascal.game.Screens.Game.Play.MainPlayScreen;
 import com.pascal.game.Utils.PathsUtils;
@@ -20,6 +20,10 @@ import com.pascal.game.Utils.TextUtils;
 import static com.pascal.game.Utils.RenderUtils.batch;
 
 public class PlayScreen implements Screen {
+
+    /*
+    Variables, constructores e instancias
+    */
 
     static Game game;
     private final TextUtils[] textOptions = new TextUtils[4];
@@ -33,20 +37,39 @@ public class PlayScreen implements Screen {
     private Texture backgroundTexture;
     private final ShapeRenderer shapeRenderer = new ShapeRenderer();
 
+    public static Music music;
+    private PreferencesManager pmanager;
+
     private TextUtils version;
 
     public PlayScreen(Game game) {
         PlayScreen.game = game;
+        this.pmanager = new PreferencesManager();
+        // Solo crea una nueva instancia de música si aún no existe
+        if (music == null) {
+            music = Gdx.audio.newMusic(Gdx.files.internal("music/kk.mp3"));
+        }
     }
 
     @Override
     public void show() {
         backgroundTexture = new Texture(Gdx.files.internal("backgrounds/menu_background.png"));
         batch = new SpriteBatch();
+        pmanager = new PreferencesManager();
         Gdx.input.setInputProcessor(inputs);
         version = new TextUtils(PathsUtils.THIRD_FONT, 22, Color.WHITE);
+        music.play();
+        music.setLooping(true);
 
-        // Configurar posición inicial para todas las opciones
+        if (!pmanager.isMusicEnabled() && PlayScreen.music != null && PlayScreen.music.isPlaying()) {
+            PlayScreen.music.stop();
+        }
+
+        float volume = pmanager.getMusicVolume();
+        if (PlayScreen.music != null) {
+            PlayScreen.music.setVolume(volume);
+        }
+
         float totalWidth = 0;
         float maxHeight = 0;
         for (String option : optionsMenu) {
@@ -58,10 +81,9 @@ public class PlayScreen implements Screen {
             }
         }
 
-        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2; // Centra horizontalmente
-        float startY = (Gdx.graphics.getHeight() - maxHeight) / 2; // Centra verticalmente
+        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2;
+        float startY = (Gdx.graphics.getHeight() - maxHeight) / 2;
 
-        // Generar los TextUtils para cada opción del menú
         float currentX = startX;
         float currentY = startY;
         for (int i = 0; i < optionsMenu.length; i++) {
@@ -70,11 +92,9 @@ public class PlayScreen implements Screen {
             text.setPosition(currentX, currentY);
             textOptions[i] = text;
 
-            // Actualizar la posición Y para la siguiente opción
-            currentY -= text.getHeight() + 30; // Espacio entre cada opción
+            currentY -= text.getHeight() + 30;
         }
     }
-
 
     @Override
     public void render(float delta) {
@@ -213,12 +233,10 @@ public class PlayScreen implements Screen {
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
@@ -233,4 +251,5 @@ public class PlayScreen implements Screen {
         shapeRenderer.dispose();
 
     }
+
 }

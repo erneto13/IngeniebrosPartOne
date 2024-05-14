@@ -12,13 +12,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.pascal.game.Managers.PreferencesManager;
 import com.pascal.game.Screens.Game.IO.InputsScreen;
-import com.pascal.game.Screens.Game.Play.MainPlayScreen;
 import com.pascal.game.Screens.Game.PlayScreen;
 import com.pascal.game.Utils.PathsUtils;
 import com.pascal.game.Utils.TextUtils;
-
-import javax.swing.event.ChangeEvent;
 
 import static com.pascal.game.Utils.RenderUtils.batch;
 
@@ -35,9 +33,8 @@ public class MainOptionsScreen implements Screen {
     private CheckBox musicCheckbox;
 
     // AppPreferences
-    private AppPreferences appPreferences;
+    private PreferencesManager preferencesManager;
     private InputMultiplexer inputMultiplexer;
-
 
     // Texto y fondo de la pantalla
     private TextUtils BACK_MENU;
@@ -53,7 +50,7 @@ public class MainOptionsScreen implements Screen {
         this.game = game;
         this.stage = new Stage();
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
-        this.appPreferences = new AppPreferences();
+        this.preferencesManager = new PreferencesManager();
         this.inputMultiplexer = new InputMultiplexer(); // Aquí se inicializa inputMultiplexer
         inputMultiplexer.addProcessor(inputsOptions);
         inputMultiplexer.addProcessor(stage);
@@ -74,20 +71,25 @@ public class MainOptionsScreen implements Screen {
         BACK_MENU.setPosition(40, 80);
 
         // Create elements
-        volumeMusicLabel = new Label("Music Volume", skin);
-        musicOnOffLabel = new Label("Music On/Off", skin);
-        volumeMusicSlider = new Slider(0f, 1f, 0.1f, false, skin);
+        volumeMusicLabel = new Label("Volumen de la musica", skin);
+        musicOnOffLabel = new Label("Musica", skin);
+        volumeMusicSlider = new Slider(0f, 100f, 1f, false, skin);
         musicCheckbox = new CheckBox(null, skin);
 
         // Set initial values from preferences
-        volumeMusicSlider.setValue(appPreferences.getMusicVolume());
-        musicCheckbox.setChecked(appPreferences.isMusicEnabled());
+        volumeMusicSlider.setValue(preferencesManager.getMusicVolume() * 100f); // Multiplica por 100 para convertirlo al rango del slider (0-100)
+        musicCheckbox.setChecked(preferencesManager.isMusicEnabled());
 
         // Add listeners
         volumeMusicSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                appPreferences.setMusicVolume(volumeMusicSlider.getValue());
+                float volume = volumeMusicSlider.getValue() / 100f; // Ajusta el valor del deslizador entre 0 y 1
+                preferencesManager.setMusicVolume(volume);
+                // Actualiza el volumen de la música en tiempo real
+                if (PlayScreen.music != null) {
+                    PlayScreen.music.setVolume(volume);
+                }
             }
         });
 
@@ -95,9 +97,21 @@ public class MainOptionsScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 boolean enabled = musicCheckbox.isChecked();
-                appPreferences.setMusicEnabled(enabled);
+                preferencesManager.setMusicEnabled(enabled);
+                if (enabled) {
+                    // Si la música está activada, inicia la reproducción de la música si no se está reproduciendo actualmente
+                    if (PlayScreen.music != null && !PlayScreen.music.isPlaying()) {
+                        PlayScreen.music.play();
+                    }
+                } else {
+                    // Si la música está desactivada, detén la reproducción de la música si se está reproduciendo actualmente
+                    if (PlayScreen.music != null && PlayScreen.music.isPlaying()) {
+                        PlayScreen.music.stop();
+                    }
+                }
             }
         });
+
 
         // Create layout
         Table table = new Table();
@@ -129,8 +143,18 @@ public class MainOptionsScreen implements Screen {
         batch.end();
         handleBackOption();
 
+        // Guardar el valor del volumen de la música en las preferencias cada vez que se modifique el slider
+        if (volumeMusicSlider.isDragging()) {
+            float volume = volumeMusicSlider.getValue() / 100f; // Ajusta el valor del slider al rango (0-1)
+            preferencesManager.setMusicVolume(volume);
+            if (PlayScreen.music != null) {
+                PlayScreen.music.setVolume(volume);
+            }
+        }
+
         victorTimely += delta;
     }
+
 
     @Override
     public void resize(int width, int height) {
