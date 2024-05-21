@@ -3,16 +3,26 @@ package com.pascal.game.Screens.Game.Play;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.pascal.game.Conversations.ConversationHandler;
 import com.pascal.game.Entities.Player;
+import com.pascal.game.Entities.NPC;
+
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class MainPlayScreen implements Screen {
 
@@ -22,8 +32,40 @@ public class MainPlayScreen implements Screen {
     private OrthogonalTiledMapRenderer renderer;
     private OrthographicCamera camera;
     private Player player;
+    private NPC npc;
+
+    // intefaz
+    private Stage stage;
+    private Skin skin;
+    private ConversationHandler conversationHandler;
 
     public MainPlayScreen(Game game) {
+        // Inicializar Stage y Skin aquí
+        stage = new Stage(new ScreenViewport());
+        skin = new Skin();
+        skin.add("default", new BitmapFont());
+
+        // Crear un Pixmap para el fondo del Window
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.DARK_GRAY);
+        pixmap.fill();
+        Drawable drawable = new TextureRegionDrawable(new Texture(pixmap));
+        pixmap.dispose();
+
+        // Crear y añadir el estilo de Window a Skin
+        Window.WindowStyle windowStyle = new Window.WindowStyle();
+        windowStyle.background = drawable;
+        windowStyle.titleFont = skin.getFont("default");
+        skin.add("default", windowStyle);
+
+        // Crear un estilo de TextButton y Label
+        TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
+        textButtonStyle.font = skin.getFont("default");
+        skin.add("default", textButtonStyle);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = skin.getFont("default");
+        skin.add("default", labelStyle);
     }
 
     @Override
@@ -34,12 +76,15 @@ public class MainPlayScreen implements Screen {
         camera = new OrthographicCamera();
         player = new Player(new Sprite(new Texture("sprite1.png")), (TiledMapTileLayer) map.getLayers().get(1));
 
+        // Cargar y crear el NPC
+        npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(1));
+        npc.setPosition(100, 100);  // Establece la posición inicial del NPC
+        conversationHandler = new ConversationHandler(skin, stage);
 
         camera.zoom = .8f;
 
-        Gdx.input.setInputProcessor(player);
-
-
+        // Establecer el InputProcessor para Stage y Player
+        Gdx.input.setInputProcessor(new InputMultiplexer(stage, player));
     }
 
     @Override
@@ -54,28 +99,45 @@ public class MainPlayScreen implements Screen {
 
         renderer.getBatch().begin();
         player.draw(renderer.getBatch());
+        npc.draw(renderer.getBatch());
         renderer.getBatch().end();
+
+        checkPlayerNPCInteraction();
+
+        // Dibujar la UI
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
+    }
+
+    private void checkPlayerNPCInteraction() {
+        float distanceX = Math.abs(player.getX() - npc.getX());
+        float distanceY = Math.abs(player.getY() - npc.getY());
+        if (distanceX < 50 && distanceY < 50) {
+            handleInteraction();
+        }
+    }
+
+    private void handleInteraction() {
+        conversationHandler.showNPCInteractionDialog();
     }
 
     @Override
     public void resize(int width, int height) {
         camera.viewportWidth = width;
         camera.viewportHeight = height;
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
     public void pause() {
-
     }
 
     @Override
     public void resume() {
-
     }
 
     @Override
     public void hide() {
-
     }
 
     @Override
@@ -83,5 +145,7 @@ public class MainPlayScreen implements Screen {
         map.dispose();
         renderer.dispose();
         player.getTexture().dispose();
+        stage.dispose();
+        skin.dispose();
     }
 }

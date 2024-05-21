@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.pascal.game.Screens.Game.Extras.MainExtrasScreen;
 import com.pascal.game.Screens.Game.IO.Inputs;
 import com.pascal.game.Managers.PreferencesManager;
@@ -35,8 +34,6 @@ public class PlayScreen implements Screen {
     public double victorTimely = 0;
 
     private Texture backgroundTexture;
-    private final ShapeRenderer shapeRenderer = new ShapeRenderer();
-
     public static Music music;
     private PreferencesManager pmanager;
 
@@ -45,7 +42,6 @@ public class PlayScreen implements Screen {
     public PlayScreen(Game game) {
         PlayScreen.game = game;
         this.pmanager = new PreferencesManager();
-        // Solo crea una nueva instancia de música si aún no existe
         if (music == null) {
             music = Gdx.audio.newMusic(Gdx.files.internal("music/kk.mp3"));
         }
@@ -112,19 +108,6 @@ public class PlayScreen implements Screen {
             text.draw();
         }
         batch.end();
-
-        // Dibujar rectángulos alrededor de las opciones
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.WHITE);
-        for (TextUtils text : textOptions) {
-            shapeRenderer.rect(
-                    text.getX(),                           // X posición del rectángulo
-                    text.getY() - text.getHeight(),        // Y posición del rectángulo
-                    text.getWidth(),                       // Ancho del rectángulo
-                    text.getHeight()                       // Alto del rectángulo
-            );
-        }
-        shapeRenderer.end();
 
         // tiempo
         victorTimely += delta;
@@ -248,8 +231,6 @@ public class PlayScreen implements Screen {
     public void dispose() {
         batch.dispose();
         backgroundTexture.dispose();
-        shapeRenderer.dispose();
-
     }
 
 }
