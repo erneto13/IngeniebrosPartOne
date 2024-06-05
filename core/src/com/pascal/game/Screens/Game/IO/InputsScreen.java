@@ -2,6 +2,7 @@ package com.pascal.game.Screens.Game.IO;
 
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.pascal.game.Screens.Game.Extras.MainExtrasScreen;
 import com.pascal.game.Screens.Game.Options.MainOptionsScreen;
 import com.pascal.game.Utils.RenderUtils;
 
@@ -14,11 +15,14 @@ public class InputsScreen implements InputProcessor {
     private int mouseX = 0, mouseY = 0;
 
     MainOptionsScreen mainOptionsScreen;
+    MainExtrasScreen mainExtrasScreen;
 
     public InputsScreen(MainOptionsScreen mainOptionsScreen) {
         this.mainOptionsScreen = mainOptionsScreen;
     }
-
+    public InputsScreen(MainExtrasScreen mainExtrasScreen){
+        this.mainExtrasScreen = mainExtrasScreen;
+    }
     @Override
     public boolean keyDown(int keycode) {
         mainOptionsScreen.victorTimely = 0.09;

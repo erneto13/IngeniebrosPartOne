@@ -43,7 +43,7 @@ public class PlayScreen implements Screen {
         PlayScreen.game = game;
         this.pmanager = new PreferencesManager();
         if (music == null) {
-            music = Gdx.audio.newMusic(Gdx.files.internal("music/kk.mp3"));
+            music = Gdx.audio.newMusic(Gdx.files.internal("music/MainMenuTest.mp3"));
         }
     }
 

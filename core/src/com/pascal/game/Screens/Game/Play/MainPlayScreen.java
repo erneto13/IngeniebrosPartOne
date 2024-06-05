@@ -1,8 +1,6 @@
 package com.pascal.game.Screens.Game.Play;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
 public class MainPlayScreen implements Screen {
@@ -33,6 +30,7 @@ public class MainPlayScreen implements Screen {
     private OrthographicCamera camera;
     private Player player;
     private NPC npc;
+    Label messageLabel;
 
     // intefaz
     private Stage stage;
@@ -44,7 +42,6 @@ public class MainPlayScreen implements Screen {
         stage = new Stage(new ScreenViewport());
         skin = new Skin();
         skin.add("default", new BitmapFont());
-
         // Crear un Pixmap para el fondo del Window
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.DARK_GRAY);
@@ -71,13 +68,13 @@ public class MainPlayScreen implements Screen {
     @Override
     public void show() {
         TmxMapLoader loader = new TmxMapLoader();
-        map = loader.load("funmap.tmx");
+        map = loader.load("Maps/miado.tmx");
         renderer = new OrthogonalTiledMapRenderer(map);
         camera = new OrthographicCamera();
         player = new Player(new Sprite(new Texture("sprite1.png")), (TiledMapTileLayer) map.getLayers().get(1));
-
+        messageLabel = new Label("Interactuar",skin);
         // Cargar y crear el NPC
-        npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(1));
+        npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(1),"Figueroa");
         npc.setPosition(100, 100);  // Establece la posición inicial del NPC
         conversationHandler = new ConversationHandler(skin, stage);
 
@@ -103,22 +100,34 @@ public class MainPlayScreen implements Screen {
         renderer.getBatch().end();
 
         checkPlayerNPCInteraction();
-
         // Dibujar la UI
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
-
+    private void updateMessagePosition(){
+        float labelX = player.getX();
+        float labelY = player.getY() + 10;
+        messageLabel.setPosition(labelX,labelY);
+    }
     private void checkPlayerNPCInteraction() {
         float distanceX = Math.abs(player.getX() - npc.getX());
         float distanceY = Math.abs(player.getY() - npc.getY());
-        if (distanceX < 50 && distanceY < 50) {
-            handleInteraction();
+        if (distanceX < 20 && distanceY < 20) {
+            //Aca el coso de arriba
+            stage.addActor(messageLabel);
+            messageLabel.setPosition(100,300);
+            if(Gdx.input.isKeyPressed(Input.Keys.E)){
+                handleInteraction();
+            }
+
+
+        }else{
+            messageLabel.remove();
         }
     }
 
     private void handleInteraction() {
-        conversationHandler.showNPCInteractionDialog();
+        conversationHandler.showNPCInteractionDialog(npc.getNombre());
     }
 
     @Override

@@ -15,6 +15,8 @@ public class Player extends Sprite implements InputProcessor {
     private float speed = 60 * 2;
     private TiledMapTileLayer collisionLayer;
     private String blockedKey = "blocked";
+    private String nombre;
+    private float vida = 100,nivel = 1;
     private int targetX;
     private int targetY;
 
@@ -23,7 +25,18 @@ public class Player extends Sprite implements InputProcessor {
         this.collisionLayer = collisionLayer;
         setSize(getWidth(), getHeight());
     }
-
+    public Player(Sprite sprite, TiledMapTileLayer collisionLayer, String nombre){
+        super(sprite);
+        this.collisionLayer = collisionLayer;
+        setSize(getWidth(), getHeight());
+        this.nombre = nombre;
+    }
+    public String getName(){
+        return this.nombre;
+    }
+    public void setNombre(String name){
+        this.nombre = name;
+    }
     @Override
     public void draw(Batch spriteBatch) {
         update(Gdx.graphics.getDeltaTime());

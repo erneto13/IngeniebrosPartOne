@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.3.3" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="50" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
  <tileset firstgid="1" source="tilemapimage2.tsx"/>
- <layer id="1" name="Tile Layer 1" width="50" height="50">
+ <layer id="1" name="Tile Layer 1" width="50" height="50" visible="0">
   <data encoding="csv">
 322,322,322,322,322,322,322,322,322,322,322,322,1730,1730,1730,1730,1730,1731,1605,1605,1605,1605,1604,1670,1671,1922,1922,1922,1922,322,1729,1730,1730,1730,1730,1730,1730,322,322,322,322,322,2500,322,322,322,322,322,322,322,
 322,322,322,322,322,322,322,322,322,322,322,1730,1730,1730,1730,1794,1794,1795,1605,1605,1604,1604,1604,1734,1735,1922,1922,1922,322,1665,1730,1730,1730,1730,1730,1730,322,322,322,322,322,322,322,322,322,322,322,322,322,322,

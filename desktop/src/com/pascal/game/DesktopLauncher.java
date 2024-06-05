@@ -7,6 +7,7 @@ public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
+		config.setResizable(false);
 		config.setTitle("Ingeniebros I: La amenaza de las 8 cintas");
 		config.setWindowIcon("15.png");
 		config.setMaximized(true);
