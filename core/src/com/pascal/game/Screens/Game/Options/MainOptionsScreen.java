@@ -1,9 +1,6 @@
 package com.pascal.game.Screens.Game.Options;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -188,11 +185,15 @@ public class MainOptionsScreen implements Screen {
             BACK_MENU.setTextColor(Color.LIGHT_GRAY);
 
             // Si se hace clic en la opción de regresar
-            if (inputsOptions.isClick()) {
+            if (inputsOptions.isClick() || Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
                 batch.dispose();
                 game.setScreen(new PlayScreen(game));
             }
         } else {
+            if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
+                batch.dispose();
+                game.setScreen(new PlayScreen(game));
+            }
             // Si el mouse no está sobre la opción de regresar, mantener el color blanco
             BACK_MENU.setTextColor(Color.WHITE);
         }

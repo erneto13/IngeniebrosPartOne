@@ -68,17 +68,18 @@ public class MainPlayScreen implements Screen {
     @Override
     public void show() {
         TmxMapLoader loader = new TmxMapLoader();
-        map = loader.load("Maps/miado.tmx");
+        map = loader.load("Maps/Parking.tmx");
         renderer = new OrthogonalTiledMapRenderer(map);
         camera = new OrthographicCamera();
-        player = new Player(new Sprite(new Texture("sprite1.png")), (TiledMapTileLayer) map.getLayers().get(1));
+        player = new Player(new Sprite(new Texture("sprite1.png")), (TiledMapTileLayer) map.getLayers().get(0));
         messageLabel = new Label("Interactuar",skin);
         // Cargar y crear el NPC
-        npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(1),"Figueroa");
+        npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(0),"Figueroa");
         npc.setPosition(100, 100);  // Establece la posición inicial del NPC
+        player.setPosition(200,200);
         conversationHandler = new ConversationHandler(skin, stage);
 
-        camera.zoom = .8f;
+        camera.zoom = .3f;
 
         // Establecer el InputProcessor para Stage y Player
         Gdx.input.setInputProcessor(new InputMultiplexer(stage, player));
@@ -100,9 +101,22 @@ public class MainPlayScreen implements Screen {
         renderer.getBatch().end();
 
         checkPlayerNPCInteraction();
+        actualizarInteractionLabel();
         // Dibujar la UI
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+    }
+    private void actualizarInteractionLabel(){
+        posicionarMensajeEnCelda(player.getX(),player.getY() +  player.getHeight() + 10,messageLabel);
+    }
+    private void posicionarMensajeEnCelda(float worldx, float worldy, Label label){
+        float   tileWidht = player.getCollisionLayer().getTileWidth();
+        float tileHeight = player.getCollisionLayer().getTileHeight();
+        int cellX = (int) (worldx / tileWidht);
+        int cellY = (int) (worldy/tileHeight);
+        float cellWorldX = cellX * tileWidht;
+        float cellWorldY = cellY * tileHeight;
+        label.setPosition(cellWorldX + tileWidht/2-label.getWidth()/2, cellWorldY + tileHeight / 2 -label.getHeight()/2);
     }
     private void updateMessagePosition(){
         float labelX = player.getX();
@@ -115,12 +129,9 @@ public class MainPlayScreen implements Screen {
         if (distanceX < 20 && distanceY < 20) {
             //Aca el coso de arriba
             stage.addActor(messageLabel);
-            messageLabel.setPosition(100,300);
             if(Gdx.input.isKeyPressed(Input.Keys.E)){
                 handleInteraction();
             }
-
-
         }else{
             messageLabel.remove();
         }

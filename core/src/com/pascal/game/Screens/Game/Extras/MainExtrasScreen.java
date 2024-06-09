@@ -2,6 +2,7 @@ package com.pascal.game.Screens.Game.Extras;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
@@ -36,18 +37,20 @@ public class MainExtrasScreen implements Screen {
     private boolean optionMouse = false;
     static Game game;
     private final InputsScreen inputsOptions = new InputsScreen(this);
+    private InputMultiplexer inputMultiplexer;
     private Stage stage;
     private Texture backgroundTexture;
     private TextUtils BACK_MENU;
     public MainExtrasScreen(Game game) {
         this.game = game;
-
+        this.stage = new Stage();
+        this.inputMultiplexer = new InputMultiplexer(); // Aquí se inicializa inputMultiplexer
+        inputMultiplexer.addProcessor(inputsOptions);
+        inputMultiplexer.addProcessor(stage);
     }
 
     @Override
     public void show() {
-        stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(stage);
 
         backgroundTexture = new Texture(Gdx.files.internal("backgrounds/clouds_background.png"));
 
