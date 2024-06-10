@@ -68,7 +68,7 @@ public class MainPlayScreen implements Screen {
     @Override
     public void show() {
         TmxMapLoader loader = new TmxMapLoader();
-        map = loader.load("Maps/Parking.tmx");
+        map = loader.load("Maps/mapototota.tmx");
         renderer = new OrthogonalTiledMapRenderer(map);
         camera = new OrthographicCamera();
         player = new Player(new Sprite(new Texture("sprite1.png")), (TiledMapTileLayer) map.getLayers().get(0));
@@ -76,7 +76,7 @@ public class MainPlayScreen implements Screen {
         // Cargar y crear el NPC
         npc = new NPC(new Sprite(new Texture("npc_sprite.png")), (TiledMapTileLayer) map.getLayers().get(0),"Figueroa");
         npc.setPosition(100, 100);  // Establece la posición inicial del NPC
-        player.setPosition(200,200);
+        player.setPosition(120,120);
         conversationHandler = new ConversationHandler(skin, stage);
 
         camera.zoom = .3f;
